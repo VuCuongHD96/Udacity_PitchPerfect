@@ -32,6 +32,7 @@ extension RecordViewModel {
         input.loadTrigger
             .sink { _ in
                 self.audioManager.setupPermission()
+                self.audioManager.setupAudio()
             }
             .store(in: cancelBag)
         

@@ -15,18 +15,28 @@ class AudioManager: NSObject {
         case slow
         case fast
         case treble
+        case alien
     }
     
     static let shared = AudioManager()
     var audioRecorder: AVAudioRecorder!
-    var audioPlayer: AVAudioPlayer!
-    var recordingSession: AVAudioSession!
+    var audioEngine: AVAudioEngine!
+    var audioFile = AVAudioFile()
     
     let engine = AVAudioEngine()
     let speedControl = AVAudioUnitVarispeed()
     
+    func setupAudio() {
+        let audioFilename = getDocumentsDirectory().appendingPathComponent("recording.m4a")
+        do {
+            audioFile = try AVAudioFile(forReading: audioFilename)
+        } catch {
+            print("--- debug --- audioFile --- error = ", error)
+        }
+    }
+    
     func setupPermission() {
-        recordingSession = AVAudioSession.sharedInstance()
+        let recordingSession = AVAudioSession.sharedInstance()
         
         do {
             try recordingSession.setCategory(.playAndRecord, mode: .default)
@@ -66,32 +76,39 @@ class AudioManager: NSObject {
     }
     
     func playAudio(voiceKind: VoiceKind) {
-        let audioURL = getDocumentsDirectory().appendingPathComponent("recording.m4a")
-        print("--- debug --- audioURL = ", audioURL)
-
+        let audioPlayerNode = AVAudioPlayerNode()
+        audioEngine = AVAudioEngine()
+        _ = audioEngine.mainMixerNode
+        audioEngine.attach(audioPlayerNode)
+        
+        let changeRatePitchNode = AVAudioUnitTimePitch()
+        audioEngine.attach(changeRatePitchNode)
+        connectAudioNodes(audioPlayerNode, changeRatePitchNode, audioEngine.outputNode)
+        audioPlayerNode.stop()
+        audioPlayerNode.scheduleFile(audioFile, at: nil)
+        
+        switch voiceKind {
+        case .slow:
+            changeRatePitchNode.rate = 0.5
+        case .fast:
+            changeRatePitchNode.rate = 2
+        case .treble:
+            changeRatePitchNode.pitch = 2000
+        case .alien:
+            changeRatePitchNode.pitch = -1000
+        default:
+            break
+        }
+        
         do {
-            audioPlayer = try AVAudioPlayer(contentsOf: audioURL)
-            switch voiceKind {
-            case .slow:
-                audioPlayer.enableRate = true
-                audioPlayer.rate = 0.5
-            case .fast:
-                audioPlayer.enableRate = true
-                audioPlayer.rate = 3
-            case .normal:
-                break
-            case .treble:
-                break
-
-            }
-            audioPlayer.prepareToPlay()
-            audioPlayer.play()
+            try audioEngine.start()
+            audioPlayerNode.play()
         } catch {
-            print("Error playing audio: \(error.localizedDescription)")
+            print(error)
         }
     }
     
-    func connectAudioNodes(_ nodes: AVAudioNode..., audioFile: AVAudioFile, audioEngine: AVAudioEngine) {
+    func connectAudioNodes(_ nodes: AVAudioNode...) {
         for x in 0..<nodes.count-1 {
             audioEngine.connect(nodes[x], to: nodes[x+1], format: audioFile.processingFormat)
         }

@@ -39,7 +39,10 @@ struct VoiceView: View {
                         input.highVoiceAction.send()
                     }
                 Spacer()
-        
+                Image("flying")
+                    .onTapGesture {
+                        input.lowVoiceAction.send()
+                    }
             }
         }
     }
