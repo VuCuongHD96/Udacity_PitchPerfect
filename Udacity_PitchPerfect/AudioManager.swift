@@ -16,6 +16,8 @@ class AudioManager: NSObject {
         case fast
         case treble
         case alien
+        case echo
+        case reverd
     }
     
     static let shared = AudioManager()
@@ -96,6 +98,17 @@ class AudioManager: NSObject {
             changeRatePitchNode.pitch = 2000
         case .alien:
             changeRatePitchNode.pitch = -1000
+        case .echo:
+            let echoNode = AVAudioUnitDistortion()
+            echoNode.loadFactoryPreset(.multiEcho1)
+            audioEngine.attach(echoNode)
+            connectAudioNodes(audioPlayerNode, changeRatePitchNode, echoNode, audioEngine.outputNode)
+        case .reverd:
+            let reverbNode = AVAudioUnitReverb()
+            reverbNode.loadFactoryPreset(.cathedral)
+            reverbNode.wetDryMix = 50
+            audioEngine.attach(reverbNode)
+            connectAudioNodes(audioPlayerNode, changeRatePitchNode, reverbNode, audioEngine.outputNode)
         default:
             break
         }
