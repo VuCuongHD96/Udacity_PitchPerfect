@@ -45,6 +45,12 @@ extension VoiceViewModel {
             }
             .store(in: cancelBag)
         
+        input.lowVoiceAction
+            .sink { _ in
+                audioManager.playAudio(voiceKind: .alien)
+            }
+            .store(in: cancelBag)
+        
         return output
     }
 }
