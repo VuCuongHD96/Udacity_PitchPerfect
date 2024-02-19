@@ -21,30 +21,42 @@ struct VoiceView: View {
     }
     
     var body: some View {
-        VStack {
-            HStack {
+        HStack {
+            VStack(spacing: 30) {
                 Image("snail")
                     .onTapGesture {
                         input.snailAction.send()
                     }
-                Spacer()
-                Image("rabbit")
-                    .onTapGesture {
-                        input.rabbitAction.send()
-                    }
-            }
-            HStack {
                 Image("squirrel")
                     .onTapGesture {
                         input.highVoiceAction.send()
                     }
-                Spacer()
-                Image("flying")
+                Image("echo")
                     .onTapGesture {
-                        input.lowVoiceAction.send()
+                        input.echoVoiceAction.send()
                     }
             }
+            Spacer()
+            VStack(spacing: 30) {
+                Image("rabbit")
+                    .onTapGesture {
+                        input.rabbitAction.send()
+                    }
+                HStack {
+                    Image("flying")
+                        .onTapGesture {
+                            input.lowVoiceAction.send()
+                        }
+                }
+                HStack {
+                    Image("reverb")
+                        .onTapGesture {
+                            input.reverbVoiceAction.send()
+                        }
+                }
+            }
         }
+        .padding()
     }
 }
 

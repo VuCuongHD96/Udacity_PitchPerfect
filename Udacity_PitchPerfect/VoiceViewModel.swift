@@ -16,6 +16,8 @@ struct VoiceViewModel {
         let rabbitAction = PassthroughSubject<Void, Never>()
         let lowVoiceAction = PassthroughSubject<Void, Never>()
         let highVoiceAction = PassthroughSubject<Void, Never>()
+        let echoVoiceAction = PassthroughSubject<Void, Never>()
+        let reverbVoiceAction = PassthroughSubject<Void, Never>()
     }
     
     class Output: ObservableObject {
@@ -50,6 +52,19 @@ extension VoiceViewModel {
                 audioManager.playAudio(voiceKind: .alien)
             }
             .store(in: cancelBag)
+        
+        input.echoVoiceAction
+            .sink { _ in
+                audioManager.playAudio(voiceKind: .echo)
+            }
+            .store(in: cancelBag)
+        
+        input.reverbVoiceAction
+            .sink { _ in
+                audioManager.playAudio(voiceKind: .reverd)
+            }
+            .store(in: cancelBag)
+        
         
         return output
     }
